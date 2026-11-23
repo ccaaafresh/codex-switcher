@@ -8,7 +8,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { api, defaultName, EXISTS, type AppState, type AuthInfo } from "./api";
 import { chooseOverwrites, confirm, promptText, toast } from "./dialogs";
-import { fiveHour, parseUsage, weekly, type UsageResult, type UsageWindow } from "./usage";
+import { fiveHour, formatCountdown, parseUsage, weekly, type UsageResult, type UsageWindow } from "./usage";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -97,10 +97,32 @@ function quotaCell(w: UsageWindow | undefined, result: UsageResult | undefined, 
   fill.style.transform = `scaleX(${w.left / 100})`;
   bar.append(fill);
   wrap.append(val, bar);
+  const left = countdown(w);
+  if (left) wrap.append(left);
   td.title = `Resets ${w.resetText}`;
   td.append(wrap);
   return td;
 }
+
+/** Live "time until reset" label, e.g. "1d 7h". */
+function countdown(w: UsageWindow): HTMLSpanElement | null {
+  if (!w.resetsAt) return null;
+  const at = w.resetsAt.getTime();
+  const span = document.createElement("span");
+  span.className = "countdown measured";
+  span.dataset.resetAt = String(at);
+  span.textContent = formatCountdown(at - Date.now());
+  span.title = `Resets ${w.resetText}`;
+  return span;
+}
+
+function tickCountdowns() {
+  const now = Date.now();
+  for (const el of document.querySelectorAll<HTMLElement>("[data-reset-at]")) {
+    el.textContent = formatCountdown(Number(el.dataset.resetAt) - now);
+  }
+}
+setInterval(tickCountdowns, 30_000);
 
 function level(left: number): string {
   if (left <= 10) return "low";

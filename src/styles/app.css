@@ -121,6 +121,7 @@ main > section { width: 100%; max-width: 1280px; margin-inline: auto; }
 tr.is-active .col-name { color: var(--color-accent); }
 
 .quota { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.quota .countdown { color: var(--color-muted); font-size: var(--text-xs); text-align: right; min-width: 6ch; }
 .skeleton { display: inline-block; width: 64px; height: 10px; border-radius: 3px; background: var(--color-rule); }
 .row-error { color: var(--color-bad); }
 

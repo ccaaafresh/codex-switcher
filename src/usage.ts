@@ -7,6 +7,8 @@ export interface UsageWindow {
   used: number;
   left: number;
   resetAt: Date | null;
+  /** Absolute moment the window resets, from reset_at or reset_after_seconds. */
+  resetsAt: Date | null;
   resetText: string;
 }
 
@@ -47,6 +49,19 @@ export function formatReset(at: Date | null, afterSeconds: number | null): strin
   return "—";
 }
 
+/** Short countdown until a reset: "1d 7h", "1h 51m", "12m". */
+export function formatCountdown(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "now";
+  const minutes = Math.floor(ms / 60000);
+  const d = Math.floor(minutes / 1440);
+  const h = Math.floor((minutes % 1440) / 60);
+  const m = minutes % 60;
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return "<1m";
+}
+
 function parseWindow(key: UsageWindow["key"], w: unknown): UsageWindow | null {
   if (!isObj(w)) return null;
   const seconds = num(w.limit_window_seconds);
@@ -60,6 +75,7 @@ function parseWindow(key: UsageWindow["key"], w: unknown): UsageWindow | null {
     used,
     left: Math.max(0, 100 - used),
     resetAt,
+    resetsAt: resetAt ?? (after !== null ? new Date(Date.now() + after * 1000) : null),
     resetText: formatReset(resetAt, after),
   };
 }
