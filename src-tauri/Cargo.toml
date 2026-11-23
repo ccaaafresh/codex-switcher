@@ -1,6 +1,6 @@
 [package]
 name = "codex-switcher"
-version = "0.2.0"
+version = "0.3.0"
 description = "Profile manager for Codex / ChatGPT accounts"
 authors = ["freshh"]
 edition = "2021"
